@@ -1,0 +1,7 @@
+ultralytics
+roboflow
+opencv-python
+supervision
+pickle
+os
+scikit-learn
