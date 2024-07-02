@@ -4,6 +4,7 @@ import cv2
 
 import pickle
 import numpy as np
+import pandas as pd
 import os
 import sys
 
@@ -15,6 +16,16 @@ class Tracker:
         self.model = YOLO(model_path)
         self.tracker = sv.ByteTrack()
 
+    def interpolate_ball(self, ball_positions):
+        ball_positions = [x.get(1,{}).get('bbox', []) for x in ball_positions]
+        ball_df = pd.DataFrame(ball_positions, columns=['x1','y1','x2','y2'])
+
+        ball_df = ball_df.interpolate()
+        ball_df = ball_df.bfill()
+
+        ball_positions = [{1: {"bbox":x}} for x in ball_df.to_numpy().tolist()]
+        return ball_positions
+    
     def detect_frames(self, frames):
         batch_sz = 20
         detections = []
@@ -37,10 +48,6 @@ class Tracker:
             "refs":[],
             "ball":[]
         }
-
-        # with open('./stubs/detections_stubs.pkl', 'rb') as f:
-        #     detections = pickle.load(f)
-        # print("loaded")
 
         for frame_num, detection in enumerate(detections):
             cls_names = detection.names
@@ -162,6 +169,9 @@ class Tracker:
             for track_id, player in player_dict.items():
                 color = player.get("team_color", (0,0,255))
                 frame = self.draw_ellipse(frame, player["bbox"], color, track_id)
+
+                if player.get('has_ball', False):
+                    frame = self.draw_triangle(frame, player["bbox"], (0,0,255))
 
             # Draw refs
             for track_id, ref in ref_dict.items():
