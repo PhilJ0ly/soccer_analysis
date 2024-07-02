@@ -5,3 +5,5 @@ supervision
 pickle
 os
 scikit-learn
+numpy
+pandas
