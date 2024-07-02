@@ -6,7 +6,7 @@ class PlayerBallAssigner():
     def __init__(self):
         self.max_distance = 70
 
-    def assign_ball_player(self,players, ball_bbox):
+    def assign_ball_player(self, players, ball_bbox):
         ball = get_center_bbox(ball_bbox)
 
         min_dis = 999

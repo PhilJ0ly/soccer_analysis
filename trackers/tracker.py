@@ -156,7 +156,24 @@ class Tracker:
 
         return frame
 
-    def draw(self, frames, tracks):
+    def draw_ball_control(self, frame, frame_num, ball_control):
+        overlay = frame.copy()
+        cv2.rectangle(overlay, (1350,850),(1900,970),(255,255,255), -1)
+        alpha = 0.4
+        cv2.addWeighted(overlay, alpha, frame, 1-alpha, 0, frame)
+
+        team_control_now = ball_control[:frame_num+1]
+
+        team_1_control = team_control_now[team_control_now==1].shape[0]
+        team_1_perc = team_1_control/(frame_num+1)*100
+        team_2_perc = 100-team_1_perc
+
+        cv2.putText(frame, f"Team 1 Ball Control: {team_1_perc:.2f}%", (1400,900),cv2.FONT_HERSHEY_SIMPLEX, 1, (0,0,0), 3)
+        cv2.putText(frame, f"Team 2 Ball Control: {team_2_perc:.2f}%", (1400,950),cv2.FONT_HERSHEY_SIMPLEX, 1, (0,0,0), 3)
+
+        return frame
+    
+    def draw(self, frames, tracks, ball_control):
         out_frames = []
         for frame_num, frame in enumerate(frames):
             frame = frame.copy()
@@ -180,6 +197,9 @@ class Tracker:
             # Draw ball
             for _, ball in ball_dict.items():
                 frame = self.draw_triangle(frame, ball["bbox"], (0,255,0))
+
+            # Draw Team Ball Control
+            frame = self.draw_ball_control(frame, frame_num, ball_control)
 
             out_frames.append(frame)
         
